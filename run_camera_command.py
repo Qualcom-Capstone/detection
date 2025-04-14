@@ -27,7 +27,7 @@ def meta_callback(meta, user_data):
 
 
 # appsink에서 샘플을 받았을 때 호출될 콜백 함수
-# https://gstreamer.freedesktop.org/documentation/gstreamer/gstbuffer.html?gi-language=python :Gst.Sample문서 참고
+# https://gstreamer.freedesktop.org/documentation/gstreamer/gstsample.html?gi-language=python :Gst.Sample문서 참고
 # https://gstreamer.freedesktop.org/documentation/gstreamer/gstbuffer.html?gi-language=python#gst_buffer_foreach_meta :Gst.Buffer문서 참고
 def on_new_sample(sink):
     """appsink에서 새 샘플이 도착할 때 호출되는 콜백"""
