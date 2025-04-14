@@ -36,7 +36,10 @@ def on_new_sample(sink):
         return Gst.FlowReturn.ERROR
 
     buffer = sample.get_buffer()  # sample의 버퍼 얻기: Gst.Buffer
-    buffer.foreach_meta(meta_callback, None)  # 버퍼 순환시에는 foreach_meta를 사용
+
+    writable_buffer = buffer.copy_deep()
+
+    writable_buffer.foreach_meta(meta_callback, None)  # 버퍼 순환시에는 foreach_meta를 사용
 
     return Gst.FlowReturn.OK
 
