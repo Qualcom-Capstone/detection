@@ -1,3 +1,13 @@
+"""
+이 파일은,
+
+export XDG_RUNTIME_DIR=/dev/socket/weston
+export WAYLAND_DISPLAY=wayland-1
+setprop persist.overlay.use_c2d_blit 2
+gst-launch-1.0 -e --gst-debug=1 qtiqmmfsrc name=camsrc camera=0 ! video/x-raw\(memory:GBM\),format=NV12,width=1280,height=720,framerate=30/1,compression=ubwc ! queue ! tee name=split split. ! queue ! qtivcomposer name=mixer sink_1::dimensions="<1920,1080>" ! queue ! waylandsink fullscreen=true sync=true split. ! queue ! qtimlvconverter ! queue ! qtimlsnpe delegate=dsp model=/opt/yolonas.dlc layers="</heads/Mul, /heads/Sigmoid>" ! queue ! qtimlvdetection threshold=51.0 results=10 module=yolo-nas labels=/opt/yolonas.labels ! video/x-raw,width=640,height=360 ! queue ! mixer.
+
+QIM모델을 실행할때 필요한 명령어 입력들을 스크립트로 자동화 시켜 놓은 파일임.
+"""
 import subprocess
 import os
 import gi
@@ -20,14 +30,13 @@ def on_new_sample(sink):
 
     buffer = sample.get_buffer()
 
-    num_meta = buffer.n_meta()  # 메타데이터 수
-    print(f"메타데이터 수: ", num_meta)
+    meta_iter = buffer.iterate_meta() #metadata돌때, iterator로 돌아야함
+    while True:
+        meta = meta_iter.next_meta()
+        if meta in None:
+            break
 
-    for i in range(num_meta):  # num_meta개수만큼 메타데이터 돌거임
-        meta = buffer.get_meta(i)  # 메타데이터 가져오고
-
-        meta_str = str(meta)  # 메타데이터 객제 정보 추출
-
+        meta_str = str(meta)
         if "detection" in meta_str.lower():
             print(f"탐지된 객체 정보: {meta_str}")
 
@@ -35,19 +44,19 @@ def on_new_sample(sink):
             if hasattr(meta, 'get_structure'):
                 structure = meta.get_structure()
                 if structure:
-                    # 감지된 객체 수
+                    # 감지된 객체 수 추출
                     num_objects = structure.get_value('num-objects', 0)
                     print(f"감지된 객체 수: {num_objects}")
 
                     for j in range(num_objects):
-                        # 각 객체의 라벨, 신뢰도, 경계 상자 위치 및 크기
+                        # 각 객체의 라벨, 신뢰도, 경계 상자 좌표 및 크기 추출
                         label = structure.get_value(f'object-{j}-label', "알 수 없음")
                         confidence = structure.get_value(f'object-{j}-confidence', 0.0)
                         x = structure.get_value(f'object-{j}-x', 0)
                         y = structure.get_value(f'object-{j}-y', 0)
                         width = structure.get_value(f'object-{j}-width', 0)
                         height = structure.get_value(f'object-{j}-height', 0)
-                        print(f"객체 {j}: {label}, 신뢰도: {confidence:.2f}, 위치: ({x},{y}), 크기: {width}x{height}")
+                        print(f"객체 {j}: {label}, 신뢰도: {confidence:.2f}, 위치: ({x}, {y}), 크기: {width}x{height}")
     return Gst.FlowReturn.OK
 
 
