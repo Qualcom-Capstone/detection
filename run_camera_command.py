@@ -21,42 +21,23 @@ import time
 Gst.init(None)
 
 
+def meta_callback(meta, user_data):
+    print(f"메타데이터 내용: {str(meta)}")
+    return True
+
+
 # appsink에서 샘플을 받았을 때 호출될 콜백 함수
+# https://gstreamer.freedesktop.org/documentation/gstreamer/gstbuffer.html?gi-language=python :Gst.Sample문서 참고
+# https://gstreamer.freedesktop.org/documentation/gstreamer/gstbuffer.html?gi-language=python#gst_buffer_foreach_meta :Gst.Buffer문서 참고
 def on_new_sample(sink):
     """appsink에서 새 샘플이 도착할 때 호출되는 콜백"""
-    sample = sink.emit("pull-sample")
+    sample = sink.emit("pull-sample")  # 여기서 sample은 Gst.Sample객체
     if not sample:
         return Gst.FlowReturn.ERROR
 
-    buffer = sample.get_buffer()
+    buffer = sample.get_buffer()  # sample의 버퍼 얻기: Gst.Buffer
+    buffer.foreach_meta(meta_callback, None)  # 버퍼 순환시에는 foreach_meta를 사용
 
-    meta_iter = buffer.iterate_meta() #metadata돌때, iterator로 돌아야함
-    while True:
-        meta = meta_iter.next_meta()
-        if meta in None:
-            break
-
-        meta_str = str(meta)
-        if "detection" in meta_str.lower():
-            print(f"탐지된 객체 정보: {meta_str}")
-
-            # meta에서 경계 상자 및 객체 정보 추출
-            if hasattr(meta, 'get_structure'):
-                structure = meta.get_structure()
-                if structure:
-                    # 감지된 객체 수 추출
-                    num_objects = structure.get_value('num-objects', 0)
-                    print(f"감지된 객체 수: {num_objects}")
-
-                    for j in range(num_objects):
-                        # 각 객체의 라벨, 신뢰도, 경계 상자 좌표 및 크기 추출
-                        label = structure.get_value(f'object-{j}-label', "알 수 없음")
-                        confidence = structure.get_value(f'object-{j}-confidence', 0.0)
-                        x = structure.get_value(f'object-{j}-x', 0)
-                        y = structure.get_value(f'object-{j}-y', 0)
-                        width = structure.get_value(f'object-{j}-width', 0)
-                        height = structure.get_value(f'object-{j}-height', 0)
-                        print(f"객체 {j}: {label}, 신뢰도: {confidence:.2f}, 위치: ({x}, {y}), 크기: {width}x{height}")
     return Gst.FlowReturn.OK
 
 
@@ -104,7 +85,7 @@ def run_gstreamer_pipeline():
 
     # appsink 가져오기 및 콜백 연결
     detect_sink = pipeline.get_by_name("detect_sink")
-    detect_sink.connect("new-sample", on_new_sample)
+    detect_sink.connect("new-sample", on_new_sample)  # appsink에 데이터가 도착할때마다, on_new_sample실행
 
     # 버스 이벤트 처리를 위한 메인 루프
     loop = GLib.MainLoop()
