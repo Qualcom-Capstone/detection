@@ -10,6 +10,7 @@ QIM모델을 실행할때 필요한 명령어 입력들을 스크립트로 자�
 """
 import subprocess
 import os
+import cv2
 
 
 def run_command(command):
