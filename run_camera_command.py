@@ -43,12 +43,12 @@ def run_gstreamer_pipeline():
     gst_pipeline = (
         "qtiqmmfsrc name=camsrc camera=0 ! "
         "video/x-raw(memory:GBM),format=NV12,width=1920,height=1080,framerate=30/1,compression=ubwc ! "
-        "qtivcomposer ! "
-        "qtimlvconverter ! "
+        "tee name=t "
+        "t. ! queue ! qtivcomposer ! waylandsink fullscreen=true sync=false "
+        "t. ! queue ! qtimlvconverter ! "
         "qtimlsnpe delegate=dsp model=/opt/yolonas.dlc layers=\"</heads/Mul, /heads/Sigmoid>\" ! "
         "qtimlvdetection threshold=51.0 results=10 module=yolo-nas labels=/opt/yolonas.labels ! "
-        "videoconvert ! "
-        "video/x-raw, format=BGR ! appsink"
+        "qtivoverlay ! videoconvert ! video/x-raw,format=BGR ! appsink"
     )
 
     # openCV로 GStreamer파이프라인 열기
@@ -58,6 +58,9 @@ def run_gstreamer_pipeline():
         return
 
     print("OpenCV가 GStreamer 파이프라인에서 프레임을 가져오는중...")
+    cv2.namedWindow("Detection via OpenCV", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow("Detection via OpenCV", 1920, 1080)
+
     while True:
         ret, frame = cap.read()  # ret: 성공여부, frame: 읽어온 프레임
         if not ret:
