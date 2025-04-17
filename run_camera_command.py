@@ -44,11 +44,15 @@ def run_gstreamer_pipeline():
         "qtiqmmfsrc name=camsrc camera=0 ! "
         "video/x-raw(memory:GBM),format=NV12,width=1920,height=1080,framerate=30/1,compression=ubwc ! "
         "tee name=t "
-        "t. ! queue ! qtivcomposer ! waylandsink fullscreen=false render-rectangle=\"0,0,960,1080\" "
+        "t. ! queue ! qtivtransform flip-vertical=true ! qtivcomposer ! "
+        "waylandsink fullscreen=false render-rectangle=\"0,0,960,1080\" "
         "t. ! queue ! qtimlvconverter ! "
         "qtimlsnpe delegate=dsp model=/opt/yolonas.dlc layers=\"</heads/Mul, /heads/Sigmoid>\" ! "
-        "qtimlvdetection threshold=51.0 results=10 module=yolo-nas labels=/opt/yolonas.labels ! "
-        "qtivoverlay ! videoconvert ! video/x-raw,format=BGR ! appsink"
+        "qtimlvdetection threshold=51.0 results=10 module=yolo-nas labels=/opt/yolonas.labels name=det ! "
+        "qtimetamux name=metamux ! qtivoverlay ! "
+        "videoconvert ! video/x-raw,format=BGR ! appsink "
+        "det. ! queue ! metamux.sink_1 "
+        "t. ! queue ! metamux.sink_0 "
     )
 
     # openCV로 GStreamer파이프라인 열기
