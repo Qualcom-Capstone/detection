@@ -66,19 +66,19 @@ def run_gstreamer_pipeline():
     cv2.resizeWindow("Detection via OpenCV", 960, 1080)
     cv2.moveWindow("OpenCV Detection", 960, 0)
 
-    while True:
-        ret, frame = cap.read()  # ret: 성공여부, frame: 읽어온 프레임
-        if not ret:
-            print("프레임 수신 실패")
-            break
+    try:
+        while True:
+            ret, frame = cap.read()  # ret: 성공여부, frame: 읽어온 프레임
+            if not ret:
+                print("프레임 수신 실패")
+                break
 
-        cv2.imshow("Detection via OpenCV", frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):  # 키입력 기다리다가 'q'입력받으면 루프 종료
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
-
+            cv2.imshow("Detection via OpenCV", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):  # 키입력 기다리다가 'q'입력받으면 루프 종료
+                break
+    finally:
+        cap.release()
+        cv2.destroyAllWindows()
 
 def run_all_commands():
     # 환경 변수 설정 - 한 번만 설정
