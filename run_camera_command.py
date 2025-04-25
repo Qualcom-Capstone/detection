@@ -1,55 +1,54 @@
-#!/usr/bin/env python3
-import os, gi, re
+"""
+프로그램 실행시,
+python run_camera_command.py 2>/dev/null (shell파일로 만들것)
+GStreamer관련 출력들 차단함
+"""
 
-gi.require_version('Gst', '1.0')
+import sys, os, gi, re
 from gi.repository import Gst, GLib
 
+gi.require_version('Gst', '1.0')
+
+# Wayland 환경 설정
+os.environ["XDG_RUNTIME_DIR"] = "/dev/socket/weston"
+os.environ["WAYLAND_DISPLAY"] = "wayland-1"
 # GStreamer 초기화
 Gst.init(None)
 
-# wayland관련 환경변수 세팅
-os.environ["XDG_RUNTIME_DIR"] = "/dev/socket/weston"
-os.environ["WAYLAND_DISPLAY"] = "wayland-1"
-os.system("setprop persist.overlay.use_c2d_blit 2")
-
-# 파이프라인 정의
+# 전체 영상에 대해 상하 반전을 inference + display 양쪽에 모두 적용하기 위해
+# tee 이전에 qtivtransform flip-vertical=true 삽입
+# threshold에 따라서 프레임 드랍 현상 생김 -> 조정 필요
 pipeline_str = (
-    "qtiqmmfsrc name=camsrc camera=0 ! "
-    "video/x-raw(memory:GBM),format=NV12,width=1280,height=720,framerate=30/1 ! "
-    "tee name=split "
-    "split. ! queue ! qtivtransform ! "
-    "waylandsink fullscreen=true sync=false "
-    "split. ! queue ! qtivtransform ! "
-    "qtimlvconverter ! "
-    "qtimlsnpe delegate=dsp model=/opt/yolonas.dlc layers=\"</heads/Mul,/heads/Sigmoid>\" ! "
-    "qtimlvdetection threshold=51.0 results=10 module=yolo-nas labels=/opt/yolonas.labels ! "
-    "tee name=dettee "
-    "dettee. ! queue ! fakesink "
-    "dettee. ! queue ! text/x-raw,format=utf8 ! appsink name=meta_sink emit-signals=true drop=true"
+    'qtiqmmfsrc camera=0 ! '
+    'qtivtransform flip-vertical=true ! '
+    'video/x-raw(memory:GBM),format=NV12,width=1920,height=1080,framerate=30/1 ! '
+    'tee name=t '
+    't. ! queue ! qtimetamux name=mux ! qtioverlay ! waylandsink fullscreen=true sync=false '
+    't. ! queue ! qtimlvconverter ! '
+    'qtimlsnpe delegate=dsp model=/opt/yolonas.dlc layers="</heads/Mul,/heads/Sigmoid>" ! '
+    'qtimlvdetection module=yolo-nas labels=/opt/yolonas.labels threshold=91.0 results=10 ! '
+    'text/x-raw ! tee name=mt '
+    'mt. ! queue ! mux. '
+    'mt. ! queue ! appsink name=meta_sink emit-signals=true sync=false drop=true max-buffers=1'
 )
 
-# 파이프라인 빌드
+# 파이프라인 생성 및 실행
 pipeline = Gst.parse_launch(pipeline_str)
+pipeline.set_state(Gst.State.PLAYING)
 
 
-def parse_metadata(raw_text):
-    cleaned = raw_text.encode('utf-8').decode('unicode_escape')
-    cleaned = cleaned.replace('\\', '')  # 이스케잎 문자 제거
-    # print("[DEBUG CLEANED]", cleaned) # 디버그용
-
-    # bounding-boxes 영역 추출
-    bbox_section = re.search(r'bounding-boxes=\(structure\)<(.*?)>,\s*timestamp', cleaned, re.DOTALL)
-    if not bbox_section:
-        # print("[WARN] bounding-boxes 구조체를 찾을 수 없음.") # 디버그용
+# 메타데이터 파싱 함수
+def parse_metadata(txt):
+    cleand = txt.encode('utf-8').decode('unicode_escape')
+    cleaned = txt.replace('\\', '')
+    m = re.search(r'bounding-boxes=\(structure\)<(.*?)>,\s*timestamp', cleaned, re.DOTALL)
+    if not m:
         return
 
-    bbox_content = bbox_section.group(1)
+    content = m.group(1)
+    entries = re.findall(r'"(.*?)"', content)
 
-    # 객체별 항목 추출 (큰따옴표로 구분된)
-    object_entries = re.findall(r'"(.*?)"', bbox_content)
-
-    for obj in object_entries:
-        # 라벨
+    for obj in entries:
         label_match = re.match(r'([a-zA-Z0-9_.]+)', obj)
         label = label_match.group(1) if label_match else "unknown"
 
@@ -63,39 +62,35 @@ def parse_metadata(raw_text):
             print(f"[DETECTED] label: {label}, but no rectangle found")
 
 
-def on_meta(sink):
-    sample = sink.emit("pull-sample")
+# appsink 콜백: 메타데이터 출력
+def on_meta(sink, _):
+    sample = sink.emit('pull-sample')
+
     if not sample:
         return Gst.FlowReturn.ERROR
+
     buf = sample.get_buffer()
 
-    # extract_dup 함수 수정
     try:
-        # 새로운 API 방식 (여러 값 반환)
-        data = buf.extract_dup(0, buf.get_size())
-        raw_text = data.decode().strip()
-        parse_metadata(raw_text)
-        # print("[METADATA extract_dup1]", data.decode().strip())
+        txt = buf.extract_dup(0, buf.get_size())
+        raw_txt = txt.decode().strip()
+        parse_metadata(raw_txt)
     except ValueError:
-        # 이전 API 방식 (튜플 반환)
-        print("[ERROR at extract]")
-        # result = buf.extract_dup(0, buf.get_size())
-        # if isinstance(result, tuple):
-        #     ok, data = result
-        #     if ok:
-        #         print("[METADATA extract_dup2]", data.decode().strip())
+        print("ERROR at extract metadata")
 
     return Gst.FlowReturn.OK
 
 
-meta = pipeline.get_by_name("meta_sink")
-meta.connect("new-sample", on_meta)
+# meta_sink에 콜백 연결
+meta_sink = pipeline.get_by_name('meta_sink')
+meta_sink.connect('new-sample', on_meta, None)
 
-# 6) 실행
-pipeline.set_state(Gst.State.PLAYING)
+# 메인 루프 실행
+loop = GLib.MainLoop()
 try:
-    GLib.MainLoop().run()
+    loop.run()
 except KeyboardInterrupt:
     pass
 finally:
     pipeline.set_state(Gst.State.NULL)
+    print('Pipeline stopped.')
