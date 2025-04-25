@@ -39,31 +39,45 @@ pipeline.set_state(Gst.State.PLAYING)
 
 # 메타데이터 파싱 함수
 def parse_metadata(txt):
+    cleand = txt.encode('utf-8').decode('unicode_escape')
     cleaned = txt.replace('\\', '')
     m = re.search(r'bounding-boxes=\(structure\)<(.*?)>,\s*timestamp', cleaned, re.DOTALL)
     if not m:
-        return []
+        return
+
     content = m.group(1)
     entries = re.findall(r'"(.*?)"', content)
-    dets = []
-    for e in entries:
-        lm = re.match(r'([\w.]+)', e)
-        label = lm.group(1) if lm else 'unknown'
-        rm = re.search(r'rectangle=\(float\)<\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*>', e)
-        if rm:
-            x, y, w, h = map(float, rm.groups())
-            dets.append((label, int(x), int(y), int(w), int(h)))
-    return dets
+
+    for obj in entries:
+        label_match = re.match(r'([a-zA-Z0-9_.]+)', obj)
+        label = label_match.group(1) if label_match else "unknown"
+
+        # 바운딩 박스 추출
+        rect_match = re.search(
+            r'rectangle=\(float\)<\s*([\d\.\-e]+)\s*,\s*([\d\.\-e]+)\s*,\s*([\d\.\-e]+)\s*,\s*([\d\.\-e]+)\s*>', obj)
+        if rect_match:
+            x, y, w, h = map(float, rect_match.groups())
+            print(f"[DETECTED] label: {label}, bbox: x={x:.3f}, y={y:.3f}, w={w:.3f}, h={h:.3f}")
+        else:
+            print(f"[DETECTED] label: {label}, but no rectangle found")
 
 
 # appsink 콜백: 메타데이터 출력
 def on_meta(sink, _):
     sample = sink.emit('pull-sample')
+
+    if not sample:
+        return Gst.FlowReturn.ERROR
+
     buf = sample.get_buffer()
-    txt = buf.extract_dup(0, buf.get_size()).decode('utf-8').strip()
-    for label, x, y, w, h in parse_metadata(txt):
-        print(f"{label}: x={x}, y={y}, w={w}, h={h}")
-    print('---')
+
+    try:
+        txt = buf.extract_dup(0, buf.get_size())
+        raw_txt = txt.decode().strip()
+        parse_metadata(raw_txt)
+    except ValueError:
+        print("ERROR at extract metadata")
+
     return Gst.FlowReturn.OK
 
 
