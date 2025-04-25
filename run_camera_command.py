@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-import os, gi
+import os, gi, re
 
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst, GLib
 
-# 1) GStreamer 초기화
+# GStreamer 초기화
 Gst.init(None)
 
-# 2) Wayland 환경 변수 및 overlay 최적화
+# wayland관련 환경변수 세팅
 os.environ["XDG_RUNTIME_DIR"] = "/dev/socket/weston"
 os.environ["WAYLAND_DISPLAY"] = "wayland-1"
 os.system("setprop persist.overlay.use_c2d_blit 2")
 
-# 3) 파이프라인 정의 (꺽쇠(<>) 포함)
+# 파이프라인 정의
 pipeline_str = (
     "qtiqmmfsrc name=camsrc camera=0 ! "
     "video/x-raw(memory:GBM),format=NV12,width=1280,height=720,framerate=30/1 ! "
@@ -28,10 +28,39 @@ pipeline_str = (
     "dettee. ! queue ! text/x-raw,format=utf8 ! appsink name=meta_sink emit-signals=true drop=true"
 )
 
-print("▶ Using pipeline:\n", pipeline_str)
-
-# 4) 파이프라인 빌드
+# 파이프라인 빌드
 pipeline = Gst.parse_launch(pipeline_str)
+
+
+def parse_metadata(raw_text):
+    cleaned = raw_text.encode('utf-8').decode('unicode_escape')
+    cleaned = cleaned.replace('\\', '')  # 이스케잎 문자 제거
+    # print("[DEBUG CLEANED]", cleaned) # 디버그용
+
+    # bounding-boxes 영역 추출
+    bbox_section = re.search(r'bounding-boxes=\(structure\)<(.*?)>,\s*timestamp', cleaned, re.DOTALL)
+    if not bbox_section:
+        # print("[WARN] bounding-boxes 구조체를 찾을 수 없음.") # 디버그용
+        return
+
+    bbox_content = bbox_section.group(1)
+
+    # 객체별 항목 추출 (큰따옴표로 구분된)
+    object_entries = re.findall(r'"(.*?)"', bbox_content)
+
+    for obj in object_entries:
+        # 라벨
+        label_match = re.match(r'([a-zA-Z0-9_.]+)', obj)
+        label = label_match.group(1) if label_match else "unknown"
+
+        # 바운딩 박스 추출
+        rect_match = re.search(
+            r'rectangle=\(float\)<\s*([\d\.\-e]+)\s*,\s*([\d\.\-e]+)\s*,\s*([\d\.\-e]+)\s*,\s*([\d\.\-e]+)\s*>', obj)
+        if rect_match:
+            x, y, w, h = map(float, rect_match.groups())
+            print(f"[DETECTED] label: {label}, bbox: x={x:.3f}, y={y:.3f}, w={w:.3f}, h={h:.3f}")
+        else:
+            print(f"[DETECTED] label: {label}, but no rectangle found")
 
 
 def on_meta(sink):
@@ -44,14 +73,17 @@ def on_meta(sink):
     try:
         # 새로운 API 방식 (여러 값 반환)
         data = buf.extract_dup(0, buf.get_size())
-        print("[METADATA]", data.decode().strip())
+        raw_text = data.decode().strip()
+        parse_metadata(raw_text)
+        # print("[METADATA extract_dup1]", data.decode().strip())
     except ValueError:
         # 이전 API 방식 (튜플 반환)
-        result = buf.extract_dup(0, buf.get_size())
-        if isinstance(result, tuple):
-            ok, data = result
-            if ok:
-                print("[METADATA]", data.decode().strip())
+        print("[ERROR at extract]")
+        # result = buf.extract_dup(0, buf.get_size())
+        # if isinstance(result, tuple):
+        #     ok, data = result
+        #     if ok:
+        #         print("[METADATA extract_dup2]", data.decode().strip())
 
     return Gst.FlowReturn.OK
 
