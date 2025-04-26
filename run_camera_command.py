@@ -39,8 +39,8 @@ pipeline.set_state(Gst.State.PLAYING)
 
 # 메타데이터 파싱 함수
 def parse_metadata(txt):
-    cleand = txt.encode('utf-8').decode('unicode_escape')
-    cleaned = txt.replace('\\', '')
+    cleaned = txt.encode('utf-8').decode('unicode_escape')
+    cleaned = cleaned.replace('\\', '')
     m = re.search(r'bounding-boxes=\(structure\)<(.*?)>,\s*timestamp', cleaned, re.DOTALL)
     if not m:
         return
