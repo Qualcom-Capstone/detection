@@ -1,11 +1,12 @@
 """
 프로그램 실행시,
-python run_camera_command.py 2>/dev/null (shell파일로 만들것)
+python main.py 2>/dev/null (shell파일로 만들것)
 GStreamer관련 출력들 차단함
 """
 
 import sys, os, gi, re
 from gi.repository import Gst, GLib
+from parser import meta_parser
 
 gi.require_version('Gst', '1.0')
 
@@ -37,31 +38,6 @@ pipeline = Gst.parse_launch(pipeline_str)
 pipeline.set_state(Gst.State.PLAYING)
 
 
-# 메타데이터 파싱 함수
-def parse_metadata(txt):
-    cleaned = txt.encode('utf-8').decode('unicode_escape')
-    cleaned = cleaned.replace('\\', '')
-    m = re.search(r'bounding-boxes=\(structure\)<(.*?)>,\s*timestamp', cleaned, re.DOTALL)
-    if not m:
-        return
-
-    content = m.group(1)
-    entries = re.findall(r'"(.*?)"', content)
-
-    for obj in entries:
-        label_match = re.match(r'([a-zA-Z0-9_.]+)', obj)
-        label = label_match.group(1) if label_match else "unknown"
-
-        # 바운딩 박스 추출
-        rect_match = re.search(
-            r'rectangle=\(float\)<\s*([\d\.\-e]+)\s*,\s*([\d\.\-e]+)\s*,\s*([\d\.\-e]+)\s*,\s*([\d\.\-e]+)\s*>', obj)
-        if rect_match:
-            x, y, w, h = map(float, rect_match.groups())
-            print(f"[DETECTED] label: {label}, bbox: x={x:.3f}, y={y:.3f}, w={w:.3f}, h={h:.3f}")
-        else:
-            print(f"[DETECTED] label: {label}, but no rectangle found")
-
-
 # appsink 콜백: 메타데이터 출력
 def on_meta(sink, _):
     sample = sink.emit('pull-sample')
@@ -74,7 +50,7 @@ def on_meta(sink, _):
     try:
         txt = buf.extract_dup(0, buf.get_size())
         raw_txt = txt.decode().strip()
-        parse_metadata(raw_txt)
+        meta_parser.parse_metadata(raw_txt)
     except ValueError:
         print("ERROR at extract metadata")
 
