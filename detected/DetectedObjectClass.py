@@ -3,6 +3,7 @@
 """
 
 from detection.coords import CoordinateClass
+from detection.utils import object_id
 
 """
 label: 객체 라벨 (예: 'car', 'truck', 'person' 등)
@@ -16,11 +17,7 @@ class DetectedObject:
         self.label = label
         self.coord = coord
         self.timestamp = timestamp
-        self.id = None  # 트래킹 ID (처음에는 None)
-
-    # 객체에 트래킹 ID부여
-    def assign_id(self, obj_id: int):
-        self.id = obj_id
+        self.id = object_id.assign_id()  # 객체 생성시, 특정 ID를 할당
 
     # 바운딩박스 중심좌표 반환
     def get_center(self):
