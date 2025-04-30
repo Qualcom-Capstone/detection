@@ -4,7 +4,6 @@
 import re
 
 
-
 # 메타데이터 파싱 함수
 def parse_metadata(txt):
     cleaned = txt.encode('utf-8').decode('unicode_escape')
@@ -15,6 +14,7 @@ def parse_metadata(txt):
 
     content = m.group(1)
     entries = re.findall(r'"(.*?)"', content)
+    results = []  # 라벨, 좌표정보 딕셔너리
 
     for obj in entries:
         label_match = re.match(r'([a-zA-Z0-9_.]+)', obj)
@@ -25,6 +25,13 @@ def parse_metadata(txt):
             r'rectangle=\(float\)<\s*([\d\.\-e]+)\s*,\s*([\d\.\-e]+)\s*,\s*([\d\.\-e]+)\s*,\s*([\d\.\-e]+)\s*>', obj)
         if rect_match:
             x, y, w, h = map(float, rect_match.groups())
-            print(f"[DETECTED] label: {label}, bbox: x={x:.3f}, y={y:.3f}, w={w:.3f}, h={h:.3f}")
+            results.append({
+                "label": label,
+                "x": x,
+                "y": y,
+                "w": w,
+                "h": h
+            })
+            # print(f"[DETECTED] label: {label}, bbox: x={x:.3f}, y={y:.3f}, w={w:.3f}, h={h:.3f}")
         else:
             print(f"[DETECTED] label: {label}, but no rectangle found")
