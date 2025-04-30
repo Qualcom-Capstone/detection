@@ -5,7 +5,12 @@ GStreamer관련 출력들 차단함
 """
 
 import sys, os, gi, re
+import time
+
 from gi.repository import Gst, GLib
+
+from detection.coords.CoordinateClass import Coordinate
+from detection.detected.DetectedObjectClass import DetectedObject
 from parser import meta_parser
 
 gi.require_version('Gst', '1.0')
@@ -50,7 +55,11 @@ def on_meta(sink, _):
     try:
         txt = buf.extract_dup(0, buf.get_size())
         raw_txt = txt.decode().strip()
-        meta_parser.parse_metadata(raw_txt)
+        detections = meta_parser.parse_metadata(raw_txt)  # 객체탐지결과 딕셔너리
+
+        for obj in detections:
+            coords = Coordinate(obj["x"], obj["y"], obj["w"], obj["h"])  # 좌표 객체
+            detected = DetectedObject(label=obj["label"], coord=coords, timestamp=time.time())  # 감지 객체 생성
     except ValueError:
         print("ERROR at extract metadata")
 
