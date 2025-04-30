@@ -35,3 +35,5 @@ def parse_metadata(txt):
             # print(f"[DETECTED] label: {label}, bbox: x={x:.3f}, y={y:.3f}, w={w:.3f}, h={h:.3f}")
         else:
             print(f"[DETECTED] label: {label}, but no rectangle found")
+
+    return results
