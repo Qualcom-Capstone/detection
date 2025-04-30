@@ -5,8 +5,14 @@ GStreamer관련 출력들 차단함
 """
 
 import sys, os, gi, re
+import time
+
 from gi.repository import Gst, GLib
+
+from detection.coords.CoordinateClass import Coordinate
+from detection.detected.DetectedObjectClass import DetectedObject
 from parser import meta_parser
+from pipeline_config import pipeline_config
 
 gi.require_version('Gst', '1.0')
 
@@ -16,25 +22,10 @@ os.environ["WAYLAND_DISPLAY"] = "wayland-1"
 # GStreamer 초기화
 Gst.init(None)
 
-# 전체 영상에 대해 상하 반전을 inference + display 양쪽에 모두 적용하기 위해
-# tee 이전에 qtivtransform flip-vertical=true 삽입
-# threshold에 따라서 프레임 드랍 현상 생김 -> 조정 필요
-pipeline_str = (
-    'qtiqmmfsrc camera=0 ! '
-    'qtivtransform flip-vertical=true ! '
-    'video/x-raw(memory:GBM),format=NV12,width=1920,height=1080,framerate=30/1 ! '
-    'tee name=t '
-    't. ! queue ! qtimetamux name=mux ! qtioverlay ! waylandsink fullscreen=true sync=false '
-    't. ! queue ! qtimlvconverter ! '
-    'qtimlsnpe delegate=dsp model=/opt/yolonas.dlc layers="</heads/Mul,/heads/Sigmoid>" ! '
-    'qtimlvdetection module=yolo-nas labels=/opt/yolonas.labels threshold=91.0 results=10 ! '
-    'text/x-raw ! tee name=mt '
-    'mt. ! queue ! mux. '
-    'mt. ! queue ! appsink name=meta_sink emit-signals=true sync=false drop=true max-buffers=1'
-)
+PIPELINE_STR = pipeline_config.get_pipeline()
 
 # 파이프라인 생성 및 실행
-pipeline = Gst.parse_launch(pipeline_str)
+pipeline = Gst.parse_launch(PIPELINE_STR)
 pipeline.set_state(Gst.State.PLAYING)
 
 
@@ -50,7 +41,11 @@ def on_meta(sink, _):
     try:
         txt = buf.extract_dup(0, buf.get_size())
         raw_txt = txt.decode().strip()
-        meta_parser.parse_metadata(raw_txt)
+        detections = meta_parser.parse_metadata(raw_txt)  # 객체탐지결과 딕셔너리
+
+        for obj in detections:
+            coords = Coordinate(obj["x"], obj["y"], obj["w"], obj["h"])  # 좌표 객체
+            detected = DetectedObject(label=obj["label"], coord=coords, timestamp=time.time())  # 감지 객체 생성
     except ValueError:
         print("ERROR at extract metadata")
 
