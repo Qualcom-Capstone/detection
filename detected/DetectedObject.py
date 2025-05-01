@@ -2,8 +2,8 @@
 탐지된 객체(DetectedObject)를 정의
 """
 
-from detection.coords import CoordinateClass
-from detection.utils import object_id
+from coords.Coordinate import Coordinate
+from utils import object_id
 
 """
 label: 객체 라벨 (예: 'car', 'truck', 'person' 등)
@@ -13,7 +13,7 @@ timestamp: 탐지된 시간 (초 단위 float)
 
 
 class DetectedObject:
-    def __init__(self, label: str, coord: CoordinateClass, timestamp: float):
+    def __init__(self, label: str, coord: Coordinate, timestamp: float):
         self.label = label
         self.coord = coord
         self.timestamp = timestamp
