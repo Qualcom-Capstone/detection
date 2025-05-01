@@ -17,7 +17,7 @@ class DetectedObject:
         self.label = label
         self.coord = coord
         self.timestamp = timestamp
-        self.id = object_id.assign_id()  # 객체 생성시, 특정 ID를 할당
+        self.id = None  # 객체 생성시, 특정 ID를 할당
 
     # 바운딩박스 중심좌표 반환
     def get_center(self):
