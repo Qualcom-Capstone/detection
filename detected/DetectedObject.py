@@ -2,8 +2,8 @@
 탐지된 객체(DetectedObject)를 정의
 """
 
-from detection.coords import CoordinateClass
-from detection.utils import object_id
+from coords.Coordinate import Coordinate
+from utils import object_id
 
 """
 label: 객체 라벨 (예: 'car', 'truck', 'person' 등)
@@ -13,11 +13,11 @@ timestamp: 탐지된 시간 (초 단위 float)
 
 
 class DetectedObject:
-    def __init__(self, label: str, coord: CoordinateClass, timestamp: float):
+    def __init__(self, label: str, coord: Coordinate, timestamp: float):
         self.label = label
         self.coord = coord
         self.timestamp = timestamp
-        self.id = object_id.assign_id()  # 객체 생성시, 특정 ID를 할당
+        self.id = None  # 객체 생성시, 특정 ID를 할당
 
     # 바운딩박스 중심좌표 반환
     def get_center(self):

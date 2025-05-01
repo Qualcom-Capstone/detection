@@ -10,7 +10,7 @@ pipeline_str = (
     't. ! queue ! qtimetamux name=mux ! qtioverlay ! waylandsink fullscreen=true sync=false '
     't. ! queue ! qtimlvconverter ! '
     'qtimlsnpe delegate=dsp model=/opt/yolonas.dlc layers="</heads/Mul,/heads/Sigmoid>" ! '
-    'qtimlvdetection module=yolo-nas labels=/opt/yolonas.labels threshold=91.0 results=10 ! '
+    'qtimlvdetection module=yolo-nas labels=/opt/yolonas.labels threshold=71.0 results=10 ! '
     'text/x-raw ! tee name=mt '
     'mt. ! queue ! mux. '
     'mt. ! queue ! appsink name=meta_sink emit-signals=true sync=false drop=true max-buffers=1'
