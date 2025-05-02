@@ -5,7 +5,7 @@
 pipeline_str = (
     'qtiqmmfsrc camera=0 ! '
     'qtivtransform flip-vertical=true ! '
-    'video/x-raw(memory:GBM),format=NV12,width=1920,height=1080,framerate=60/1 ! '
+    'video/x-raw(memory:GBM),format=NV12,width=1920,height=1080,framerate=30/1 ! '
     'tee name=t '
     't. ! queue ! qtimetamux name=mux ! qtioverlay ! waylandsink fullscreen=true sync=false '
     't. ! queue ! qtimlvconverter ! '
