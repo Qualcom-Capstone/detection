@@ -24,9 +24,6 @@ PIPELINE_STR = pipeline_config.get_pipeline()
 pipeline = Gst.parse_launch(PIPELINE_STR)
 pipeline.set_state(Gst.State.PLAYING)
 
-tracked_objects = []  # 이전 프레임까지 트래킹된 객체들 저장
-IOU_THRESHOLD = 0.7  # 같은 객체로 간주할 iou
-
 
 # appsink 콜백: 메타데이터 출력
 def on_meta(sink, _):
@@ -36,8 +33,6 @@ def on_meta(sink, _):
         return Gst.FlowReturn.ERROR
 
     buf = sample.get_buffer()
-
-    global tracked_objects
 
     try:
         txt = buf.extract_dup(0, buf.get_size())
