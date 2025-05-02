@@ -1,5 +1,4 @@
 import time
-from parser import meta_parser
 from coords.Coordinate import Coordinate
 from detected.DetectedObject import DetectedObject
 from utils import iou, object_id
