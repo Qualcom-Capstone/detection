@@ -5,7 +5,7 @@ from detected.DetectedObject import DetectedObject
 from utils import iou, object_id
 
 tracked_objects = []
-IOU_THRESHOLD = 0.7
+IOU_THRESHOLD = 0.5
 
 
 def track_object(detections):
