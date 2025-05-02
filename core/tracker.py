@@ -2,6 +2,7 @@ import time
 from coords.Coordinate import Coordinate
 from detected.DetectedObject import DetectedObject
 from utils import iou, object_id
+from core import speed
 
 tracked_objects = []
 IOU_THRESHOLD = 0.5
@@ -29,9 +30,15 @@ def track_object(detections):
         if not matched:
             detected.id = object_id.assign_id()
 
+        speed_val = speed.compute_speed(detected.id, detected.coord, detected.timestamp)  # 해당 id에 대한 속도 계산
+        speed.latest_speeds[detected.id] = speed_val
         current_frame_objects.append(detected)
 
         print(
-            f"id={detected.id}, x={detected.coord.x}, y={detected.coord.y}, w={detected.coord.w}, h={detected.coord.h}")
+            f"id={detected.id}, "
+            f"speed={'{:.2f}'.format(speed_val) if speed_val is not None else 'None'}, "
+            f"x={detected.coord.x:.1f}, y={detected.coord.y:.1f}, "
+            f"w={detected.coord.w:.1f}, h={detected.coord.h:.1f}"
+        )
 
     tracked_objects = current_frame_objects
