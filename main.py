@@ -7,6 +7,8 @@ import sys, os, gi, re
 from gi.repository import Gst, GLib
 from pipeline_config import pipeline_config
 from callbacks import on_callbacks
+import threading, time
+from utils.save_image import save_raw_frame_as_jpeg
 
 gi.require_version('Gst', '1.0')
 
@@ -26,6 +28,35 @@ pipeline.set_state(Gst.State.PLAYING)
 # meta_sink에 콜백 연결 (메타데이터 추출용)
 meta_sink = pipeline.get_by_name('meta_sink')
 meta_sink.connect('new-sample', on_callbacks.on_meta, None)
+
+frame_sink = pipeline.get_by_name('frame_sink')
+
+def take_screenshot():
+    print("[INFO] Taking screenshot...")
+
+    sample = frame_sink.emit("pull-sample")
+    if not sample:
+        print("[ERROR] No frame received.")
+        return
+
+    buffer = sample.get_buffer()
+    success, map_info = buffer.map(Gst.MapFlags.READ)
+    if not success:
+        print("[ERROR] Buffer mapping failed.")
+        return
+
+    try:
+        frame_bytes = bytes(map_info.data)
+        caps_str = sample.get_caps().to_string()
+        print("[DEBUG] sample caps:", caps_str)
+        filename = f"screenshot_{int(time.time())}.jpg"
+        save_raw_frame_as_jpeg(frame_bytes, filename)
+    finally:
+        buffer.unmap(map_info)
+
+# 실행 10초 후 자동 저장
+threading.Timer(10, take_screenshot).start()
+
 
 # 메인 루프 실행
 loop = GLib.MainLoop()

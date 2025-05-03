@@ -13,7 +13,10 @@ pipeline_str = (
     'qtimlvdetection module=yolo-nas labels=/opt/yolonas.labels threshold=71.0 results=10 ! '
     'text/x-raw ! tee name=mt '
     'mt. ! queue ! mux. '
-    'mt. ! queue ! appsink name=meta_sink emit-signals=true sync=false drop=true max-buffers=1'
+    'mt. ! queue ! appsink name=meta_sink emit-signals=true sync=false drop=true max-buffers=1 '
+    't. ! queue ! qtivtransform ! videoconvert ! '
+    'video/x-raw,format=RGB,width=1920,height=1080 ! '
+    'appsink name=frame_sink emit-signals=false sync=false max-buffers=1 drop=true'
 )
 
 
