@@ -5,9 +5,8 @@ GStreamer관련 출력들 차단함
 """
 import sys, os, gi, re
 from gi.repository import Gst, GLib
-from parser import meta_parser
 from pipeline_config import pipeline_config
-from core import tracker
+from callbacks import on_callbacks
 
 gi.require_version('Gst', '1.0')
 
@@ -18,36 +17,15 @@ os.environ["WAYLAND_DISPLAY"] = "wayland-1"
 # GStreamer 초기화
 Gst.init(None)
 
-PIPELINE_STR = pipeline_config.get_pipeline()
+PIPELINE_STR = pipeline_config.get_pipeline()  # 파이프라인 가져옴
 
 # 파이프라인 생성 및 실행
 pipeline = Gst.parse_launch(PIPELINE_STR)
 pipeline.set_state(Gst.State.PLAYING)
 
-
-# appsink 콜백: 메타데이터 출력
-def on_meta(sink, _):
-    sample = sink.emit('pull-sample')
-
-    if not sample:
-        return Gst.FlowReturn.ERROR
-
-    buf = sample.get_buffer()
-
-    try:
-        txt = buf.extract_dup(0, buf.get_size())
-        raw_txt = txt.decode().strip()
-        detections = meta_parser.parse_metadata(raw_txt)  # 객체 탐지 결과를, 딕셔너리가 담긴 리스트로 반환
-        tracker.track_object(detections)
-    except ValueError:
-        print("ERROR at extract metadata")
-
-    return Gst.FlowReturn.OK
-
-
-# meta_sink에 콜백 연결
+# meta_sink에 콜백 연결 (메타데이터 추출용)
 meta_sink = pipeline.get_by_name('meta_sink')
-meta_sink.connect('new-sample', on_meta, None)
+meta_sink.connect('new-sample', on_callbacks.on_meta, None)
 
 # 메인 루프 실행
 loop = GLib.MainLoop()
