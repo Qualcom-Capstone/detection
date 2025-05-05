@@ -4,6 +4,7 @@
 global_id = 0
 
 
+# 감지된 객체에 id를 할당
 def assign_id():
     global global_id
     id_to_assign = global_id
