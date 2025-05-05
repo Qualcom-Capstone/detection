@@ -1,5 +1,4 @@
 from math import sqrt
-from coords import Coordinate
 
 pre_positions = {}  # id에 대한 (x, y)중심좌표
 pre_timestamps = {}  # id에 대한 timestamp (초 단위 시간)
@@ -27,3 +26,9 @@ def compute_speed(id, coord, timestamp):
         latest_speeds[id] = speed  # 특정 id에 대한 속도를 저장
 
     return speed
+
+
+def compute_and_store_speed(detect_id, detected_coord, detected_timestamp):
+    speed_val = compute_speed(detect_id, detected_coord, detected_timestamp)  # 해당 id에 대한 속도 계산
+    latest_speeds[detect_id] = speed_val  # 해당 id에 대한 속도를 배열로 저장(id를 인덱스로 접근)
+    return speed_val
