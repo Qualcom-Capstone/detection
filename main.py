@@ -34,7 +34,7 @@ meta_sink.connect('new-sample', on_callbacks.on_meta, None)
 frame_sink = pipeline.get_by_name('frame_sink')
 
 # 실행 10초 후 자동 저장 (for test), 이건 테스트용도임. 필요에 따라 함수 호출하면 됨.
-# threading.Timer(10, lambda: camera_manager.take_screenshot(frame_sink)).start()
+threading.Timer(10, lambda: camera_manager.take_screenshot(frame_sink)).start()
 
 # 메인 루프 실행
 loop = GLib.MainLoop()
