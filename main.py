@@ -7,9 +7,9 @@ import sys, os, gi, re
 from gi.repository import Gst, GLib
 from pipeline_config import pipeline_config
 from callbacks import on_callbacks
-import threading, time
-from utils.save_image import save_raw_frame_as_jpeg
+import threading, queue, time
 from manager import camera_manager
+from thread.postprocess_thread import run_thread
 
 gi.require_version('Gst', '1.0')
 
@@ -38,6 +38,8 @@ threading.Timer(10, lambda: camera_manager.take_screenshot(frame_sink)).start()
 
 # 메인 루프 실행
 loop = GLib.MainLoop()
+
+run_thread()
 
 try:
     loop.run()
