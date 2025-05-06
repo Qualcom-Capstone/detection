@@ -2,6 +2,9 @@ import sys, os, gi, re
 from gi.repository import Gst, GLib
 from parser import meta_parser
 from core import tracker
+from shared import shared_queue
+import queue
+import threading
 
 
 # appsink 콜백: 메타데이터 출력
@@ -17,7 +20,8 @@ def on_meta(sink, _):
         txt = buf.extract_dup(0, buf.get_size())  # 버퍼에서 메타데이터 뽑아냄
         raw_txt = txt.decode().strip()
         detections = meta_parser.parse_metadata(raw_txt)  # 메타데이터를 객체의 필드에 각각 파싱함 -> 객체 딕셔너리 반환
-        tracker.track_object(detections)  # 객체들 트래킹 시작
+        shared_queue.detectionQueue.put(detections)  # 감지 결과 큐에 넣음
+        # tracker.track_object(detections)  # 객체들 트래킹 시작
     except ValueError:
         print("ERROR at extract metadata")
 
