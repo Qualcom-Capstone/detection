@@ -3,7 +3,7 @@ from coords.Coordinate import Coordinate
 from detected.DetectedObject import DetectedObject
 from utils import iou, object_id
 from core import speed
-from shared import speed_limit
+from shared import speed_limit, violation_filter
 
 tracked_objects = []
 IOU_THRESHOLD = 0.5  # 필요시 조정
@@ -32,6 +32,10 @@ def track_object(detections):
                 'over_speed': speed_val,
                 # 'location': '위치정보'(가능하다면)
             }
+
+            is_ok = violation_filter.should_send_violation(detected.id)  # 보내도 되는지 확인 (이전에 이미 단속된 차량인지)
+            if is_ok:  # 보내도 되면
+                continue  # send_to_server(violation_info) sample코드
 
         current_frame_objects.append(detected)  # 현재 프레임에, 생성했던 객체 넣음
 
