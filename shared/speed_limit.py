@@ -1,0 +1,1 @@
+SPEED_LIMIT = 50  # 50km/h
