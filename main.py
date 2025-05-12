@@ -10,6 +10,7 @@ from callbacks import on_callbacks
 import threading, queue, time
 from manager import camera_manager
 from thread.postprocess_thread import run_thread
+from thread.takeshots_and_send_thread import run_save_and_send_thread
 from s3_uploader import s3_upload
 
 gi.require_version('Gst', '1.0')
@@ -35,15 +36,16 @@ meta_sink.connect('new-sample', on_callbacks.on_meta, None)
 frame_sink = pipeline.get_by_name('frame_sink')
 
 # 실행 10초 후 자동 저장 (for test), 이건 테스트용도임. 필요에 따라 함수 호출하면 됨.
-threading.Timer(10, lambda: camera_manager.take_screenshot(frame_sink)).start()
+# threading.Timer(10, lambda: camera_manager.take_screenshot(frame_sink)).start()
 
 # 실행 12초 후 s3로 이미지 보냄
-threading.Timer(10, lambda: s3_upload.upload_image_to_cars_folder("screenshot_43.jpg")).start()
+# threading.Timer(10, lambda: s3_upload.upload_image_to_cars_folder("images/screenshot_43.jpg")).start()
 
 # 메인 루프 실행
 loop = GLib.MainLoop()
 
-run_thread()
+run_thread()  # 트래킹 스레드
+run_save_and_send_thread()  # 이미지 촬영 및 전송 스레드
 
 try:
     loop.run()

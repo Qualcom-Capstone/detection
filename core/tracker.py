@@ -1,3 +1,4 @@
+import threading
 import time
 from coords.Coordinate import Coordinate
 from detected.DetectedObject import DetectedObject
@@ -5,6 +6,9 @@ from utils import iou, object_id
 from core import speed
 from shared import speed_limit, violation_filter
 from s3_uploader import s3_upload
+from manager import camera_manager
+from shared import shared_queue
+import main
 
 tracked_objects = []
 IOU_THRESHOLD = 0.5  # 필요시 조정
@@ -31,8 +35,12 @@ def track_object(detections):
             violation_info = {
                 'time': detected.timestamp,
                 'over_speed': speed_val,
-                # 'location': '위치정보'(가능하다면)
+                'id': detected.id,
+                'coord': detected.coord
             }
+
+            shared_queue.imageQueue.put(main.frame_sink)  # 과속한 순간의 프레임, 큐에 넣음
+            shared_queue.metaQueue.put(violation_info)  # 과속한 순간의 메타데이터, 큐에 넣음
 
             is_ok = violation_filter.should_send_violation(detected.id)  # 보내도 되는지 확인 (이전에 이미 단속된 차량인지)
             if is_ok:  # 보내도 되면

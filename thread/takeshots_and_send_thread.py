@@ -1,0 +1,35 @@
+import threading
+
+from manager import camera_manager
+from s3_uploader import s3_upload
+from shared import shared_queue
+
+_thread_started = False
+
+img_path = "/home/root/detection/images/screenshot_47.jpg"
+
+
+def save_and_send():
+    while True:
+        try:
+            img_item = shared_queue.imageQueue.get()  # 큐에서 프레임 꺼냄
+            meta_item = shared_queue.metaQueue.get()  # 큐에서 메타데이터 꺼냄
+
+            if not img_item:
+                continue
+
+            camera_manager.take_screenshot(img_item)  # 꺼낸 프레임 사진찍음
+            s3_upload.upload_image_to_cars_folder(img_path)  # 찍은 이미지 s3서버로 전송
+            # send_to_server(meta_item) # 메타정보 서버로 보냄
+
+        except Exception as e:
+            print(f"Save and Send Thread Error! : {e}")
+
+
+def run_save_and_send_thread():
+    global _thread_started
+    if _thread_started:
+        return
+
+    threading.Thread(target=save_and_send, daemon=True, name="SaveAndSendThread").start()
+    _thread_started = True
