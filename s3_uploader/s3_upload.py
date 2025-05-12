@@ -15,12 +15,6 @@ REGION = os.getenv("AWS_S3_REGION")
 # .env 로드
 load_dotenv()
 
-# 환경변수 가져오기
-ACCESS_KEY = os.getenv("AWS_ACCESS_KEY")
-SECRET_KEY = os.getenv("AWS_SECRET_KEY")
-BUCKET_NAME = os.getenv("AWS_S3_BUCKET_NAME")
-REGION = os.getenv("AWS_S3_REGION")
-
 # S3 클라이언트 생성
 s3 = boto3.client(
     's3',
@@ -28,6 +22,7 @@ s3 = boto3.client(
     aws_secret_access_key=SECRET_KEY,
     region_name=REGION
 )
+
 
 def upload_image_to_cars_folder(image_path):
     if not os.path.isfile(image_path):
@@ -57,8 +52,7 @@ def upload_image_to_cars_folder(image_path):
         print("❌ AWS 자격증명이 유효하지 않습니다.")
         return None
 
-
-metadata = upload_image_to_cars_folder("supervised_learning_visual.jpg")
-if metadata:
-    print("\n메타데이터 저장용 객체:")
-    print(metadata)
+# metadata = upload_image_to_cars_folder("supervised_learning_visual.jpg")
+# if metadata:
+#     print("\n메타데이터 저장용 객체:")
+#     print(metadata)

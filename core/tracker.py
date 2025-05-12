@@ -4,6 +4,7 @@ from detected.DetectedObject import DetectedObject
 from utils import iou, object_id
 from core import speed
 from shared import speed_limit, violation_filter
+from s3_uploader import s3_upload
 
 tracked_objects = []
 IOU_THRESHOLD = 0.5  # 필요시 조정
