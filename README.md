@@ -1,25 +1,42 @@
-# detection
-Rubik-Pi object detection
+# Rubik Pi Object Detection
 
-## 목표
-+ Yolo모델, Rubik3보드 환경 구축
-+ GStreamer 그 외의 plug-in 들의 이해
-+ 객체 탐지, bounding box, label 등 화면 출력
-+ ㅡㅡㅡㅡㅡㅡㅡㅡㅡ여기까지 블로그에 후기 올림ㅡㅡㅡㅡㅡㅡㅡㅡㅡ
-+ 객체 트래킹
-+ 객체 속도 측정
-+ OCR
-+ 과속 시, API call, 서버 전송
----
+실시간 과속 차량 감지 시스템 with Rubik Pi
+
+# 목차
 
 ## 실행
-루트경로는 `detection` 디렉토리로 생각한다.
-원래 루트 경로는 `rubik-detection` 인데, `main.py`가
-detection디렉토리 밑에 있기 때문에, 루트는 detection으로 정한다.
 
-따라서 `./run_detection.sh`를 실행할 때도 실행의 위치가
-detection 디렉토여야 한다.
+root 디렉토리 밑에 run.sh를 실행한다.
 
-`chmod +x run_detection.sh`를 하여 .sh에 실행권한 부여
+```plain
+/run.sh 소스
 
-`./run_detection.sh`를 입력하여 실행
+export PYTHONPATH=$(pwd)
+python main.py 2>/dev/null
+```
+
+`./run.sh`로 실행.
+
+내부 디버깅 출력문을 전부, 생략한다(터미널 IO최소화)
+
+---
+
+## GStremaer, YOLO 파이프라인 구성
+
+```plain
+qtiqmmfsrc (카메라 입력)
+    → qtivtransform (flip-vertical 적용)
+    → tee split
+        ├── qtimetamux → qtioverlay → waylandsink (화면 출력)
+        ├── qtimlvconverter → qtimltflite → qtimlvdetection
+                → tee mt
+                    ├── metamux (메타데이터 합성용)
+                    └── appsink meta_sink (메타데이터 수신, emit-signals=true)
+        └── qtivtransform → videoconvert → appsink frame_sink (프레임 캡처용)
+```
+
+---
+
+## 객체 트래킹
+
+### IoU
