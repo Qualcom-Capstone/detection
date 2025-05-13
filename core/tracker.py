@@ -47,9 +47,9 @@ def track_object(detections):
 
         print(
             f"id={detected.id}, "
-            f"speed={'{:.2f}'.format(speed_val) if speed_val is not None else 'None'}, "
-            f"x={detected.coord.x:.1f}, y={detected.coord.y:.1f}, "
-            f"w={detected.coord.w:.1f}, h={detected.coord.h:.1f}"
+            f"speed={'{:.3f}'.format(speed_val) if speed_val is not None else 'None'}, "
+            f"x={detected.coord.x:.3f}, y={detected.coord.y:.3f}, "
+            f"w={detected.coord.w:.3f}, h={detected.coord.h:.3f}"
         )
 
     tracked_objects = current_frame_objects  # 다음 프레임 비교를 위해 현재 프레임 객체들을 트래킹 리스트로 갱신
