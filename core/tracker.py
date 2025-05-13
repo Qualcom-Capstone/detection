@@ -32,19 +32,16 @@ def track_object(detections):
         speed_val = speed.compute_and_store_speed(detected.id, detected.coord, detected.timestamp)  # 속도 계산 및 저장
 
         if speed_val > speed_limit.SPEED_LIMIT:  # 과속 했다면
-            violation_info = {
-                'time': detected.timestamp,
-                'over_speed': speed_val,
-                'id': detected.id,
-                'coord': detected.coord
-            }
-
-            shared_queue.imageQueue.put(main.frame_sink)  # 과속한 순간의 프레임, 큐에 넣음
-            shared_queue.metaQueue.put(violation_info)  # 과속한 순간의 메타데이터, 큐에 넣음
-
             is_ok = violation_filter.should_send_violation(detected.id)  # 보내도 되는지 확인 (이전에 이미 단속된 차량인지)
-            if is_ok:  # 보내도 되면
-                continue  # send_to_server(violation_info) sample코드
+            if is_ok:
+                violation_info = {
+                    'time': detected.timestamp,
+                    'over_speed': speed_val,
+                    'id': detected.id,
+                    'coord': detected.coord
+                }
+                shared_queue.imageQueue.put(main.frame_sink)  # 과속한 순간의 프레임, 큐에 넣음
+                shared_queue.metaQueue.put(violation_info)  # 과속한 순간의 메타데이터, 큐에 넣음
 
         current_frame_objects.append(detected)  # 현재 프레임에, 생성했던 객체 넣음
 

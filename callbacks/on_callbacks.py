@@ -21,7 +21,7 @@ def on_meta(sink, _):
         raw_txt = txt.decode().strip()
         detections = meta_parser.parse_metadata(raw_txt)  # 메타데이터를 객체의 필드에 각각 파싱함 -> 객체 딕셔너리 반환
         shared_queue.detectionQueue.put(detections)  # 감지 결과 큐에 넣음
-        # tracker.track_object(detections)  # 객체들 트래킹 시작
+        # tracker.track_object(detections)  # 객체들 트래킹 시작 -> 멀티스레드로 돌리는걸로 수정함
     except ValueError:
         print("ERROR at extract metadata")
 
