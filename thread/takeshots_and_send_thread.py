@@ -1,26 +1,27 @@
 import threading
-
+import time
 from manager import camera_manager
 from s3_uploader import s3_upload
 from shared import shared_queue
+from gi.repository import Gst, GLib
 
 _thread_started = False
 
 
-def save_and_send():
+def save_and_send(frame_sink):
     while True:
         try:
-            img_item = shared_queue.imageQueue.get()  # 큐에서 프레임 꺼냄
+            flag = shared_queue.imageQueue.get()  # 큐에서 프레임 꺼냄
             meta_item = shared_queue.metaQueue.get()  # 큐에서 메타데이터 꺼냄
 
-            if not img_item:
-                continue
-            if not meta_item:
+            if flag != "TAKE_SHOT" or not meta_item:
                 continue
 
-            camera_manager.take_screenshot(img_item, meta_item['id'])  # 꺼낸 프레임 사진찍음
+            GLib.idle_add(camera_manager.take_screenshot, frame_sink, meta_item['id'])
+            time.sleep(1)
+
             img_path = f"/home/root/detection/images/screenshot_{meta_item['id']}.jpg"
-            # s3_upload.upload_image_to_cars_folder(img_path)  # 찍은 이미지 s3서버로 전송
+            s3_upload.upload_image_to_cars_folder(img_path)  # 찍은 이미지 s3서버로 전송
             # send_to_server(meta_item) # 메타정보 서버로 보냄
 
         except Exception as e:

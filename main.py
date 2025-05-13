@@ -4,11 +4,14 @@ python main.py 2>/dev/null (shell파일로 만들것)
 GStreamer관련 출력들 차단함
 """
 import sys, os, gi, re
+import threading
+
 from gi.repository import Gst, GLib
 from pipeline_config import pipeline_config
 from callbacks import on_callbacks
 from thread.postprocess_thread import run_thread
 from thread.takeshots_and_send_thread import run_save_and_send_thread
+from thread.takeshots_and_send_thread import save_and_send
 
 gi.require_version('Gst', '1.0')
 
@@ -42,7 +45,8 @@ frame_sink = pipeline.get_by_name('frame_sink')
 loop = GLib.MainLoop()
 
 run_thread()  # 트래킹 스레드
-run_save_and_send_thread()  # 이미지 촬영 및 전송 스레드
+threading.Thread(target=save_and_send, args=(frame_sink,), daemon=True).start()
+# run_save_and_send_thread()  # 이미지 촬영 및 전송 스레드
 
 try:
     loop.run()
