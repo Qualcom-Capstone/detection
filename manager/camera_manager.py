@@ -4,7 +4,7 @@ from utils.save_image import save_raw_frame_as_jpeg
 import time
 
 
-def take_screenshot(frame_sink):
+def take_screenshot(frame_sink, car_id):
     print("[INFO] Taking screenshot...")
 
     sample = frame_sink.emit("pull-sample")
@@ -22,7 +22,7 @@ def take_screenshot(frame_sink):
         frame_bytes = bytes(map_info.data)
         caps_str = sample.get_caps().to_string()
         print("[DEBUG] sample caps:", caps_str)
-        filename = f"screenshot_{int(time.time())}.jpg"
+        filename = f"/home/root/detection/images/screenshot_{car_id}.jpg"
         save_raw_frame_as_jpeg(frame_bytes, filename)
     finally:
         buffer.unmap(map_info)
