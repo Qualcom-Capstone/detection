@@ -20,7 +20,7 @@ def save_and_send():
 
             camera_manager.take_screenshot(img_item, meta_item['id'])  # 꺼낸 프레임 사진찍음
             img_path = f"/home/root/detection/images/screenshot_{meta_item['id']}.jpg"
-            s3_upload.upload_image_to_cars_folder(img_path)  # 찍은 이미지 s3서버로 전송
+            # s3_upload.upload_image_to_cars_folder(img_path)  # 찍은 이미지 s3서버로 전송
             # send_to_server(meta_item) # 메타정보 서버로 보냄
 
         except Exception as e:

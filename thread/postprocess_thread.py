@@ -10,6 +10,7 @@ def postprocess_thread():
         try:
             detections = shared_queue.detectionQueue.get()
             if not detections:
+                # print("empty queue!")
                 continue
 
             tracker.track_object(detections)

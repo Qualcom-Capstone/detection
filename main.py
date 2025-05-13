@@ -7,11 +7,8 @@ import sys, os, gi, re
 from gi.repository import Gst, GLib
 from pipeline_config import pipeline_config
 from callbacks import on_callbacks
-import threading, queue, time
-from manager import camera_manager
 from thread.postprocess_thread import run_thread
 from thread.takeshots_and_send_thread import run_save_and_send_thread
-from s3_uploader import s3_upload
 
 gi.require_version('Gst', '1.0')
 
