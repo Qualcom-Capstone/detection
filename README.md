@@ -1,8 +1,13 @@
 # Rubik Pi Object Detection
 
-실시간 과속 차량 감지 시스템 with Rubik Pi
+실시간 과속 차량 감지 시스템 on **Rubik Pi**
 
 # 목차
++ 실행 방법
++ 파이프라인 구성
++ 객체 트래킹
++ 속도 측정
++ 멀티 스레딩
 
 ## 실행
 
@@ -37,6 +42,7 @@ qtiqmmfsrc (카메라 입력)
 
 ---
 
-## 객체 트래킹
+## 객체 트래킹 (IoU)
 
-### IoU
+
+## Speed Calculate
