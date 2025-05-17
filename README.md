@@ -42,8 +42,15 @@ qtiqmmfsrc (카메라 입력)
 
 ---
 
-## 객체 트래킹 (IoU)
+## Object Tracking (IoU)
 <img src="https://github.com/user-attachments/assets/868437d2-78e2-4d52-89a7-3d7f9e850517" width="300" height="200">
 
 IoU를 계산하여, 다음프레임의 객체가 같은 객체인지 판단한다.
 ## Speed Calculate
+<img src="https://github.com/user-attachments/assets/dba955f8-c974-41ce-9d1e-6f675a636b09" width="300", height="200">
+
+프레임간 중심 좌표의 이동거리 변화로 속도를 측정
+
+---
+## Multi Threading
+
