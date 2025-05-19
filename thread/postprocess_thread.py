@@ -1,4 +1,5 @@
 import threading
+import time
 from shared import shared_queue
 from core import tracker
 
@@ -19,6 +20,7 @@ def postprocess_thread():
 
 
 def run_thread():
+    time.sleep(1)
     global _thread_started
     if _thread_started:  # 스레드 실행했다면
         return

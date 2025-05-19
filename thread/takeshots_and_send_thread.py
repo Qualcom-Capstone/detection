@@ -34,6 +34,7 @@ def save_and_send(frame_sink):
 
 
 def run_save_and_send_thread():
+    time.sleep(1)
     global _thread_started
     if _thread_started:
         return
