@@ -35,18 +35,11 @@ meta_sink.connect('new-sample', on_callbacks.on_meta, None)
 # 스크린샷 찍는 용도
 frame_sink = pipeline.get_by_name('frame_sink')
 
-# 실행 10초 후 자동 저장 (for test), 이건 테스트용도임. 필요에 따라 함수 호출하면 됨.
-# threading.Timer(10, lambda: camera_manager.take_screenshot(frame_sink)).start()
-
-# 실행 12초 후 s3로 이미지 보냄
-# threading.Timer(10, lambda: s3_upload.upload_image_to_cars_folder("images/screenshot_43.jpg")).start()
-
 # 메인 루프 실행
 loop = GLib.MainLoop()
 
 run_thread()  # 트래킹 스레드
-threading.Thread(target=save_and_send, args=(frame_sink,), daemon=True).start()
-# run_save_and_send_thread()  # 이미지 촬영 및 전송 스레드
+threading.Thread(target=save_and_send, args=(frame_sink,), daemon=True).start()  # 사진 촬영 및 전송 스레드
 
 try:
     loop.run()
