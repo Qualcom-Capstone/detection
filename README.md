@@ -4,6 +4,26 @@
 
 A real-time speeding vehicle detection system on **Rubik Pi**
 
+# Overview
+
+이 프로젝트는 Qualcomm 기반 Rubik Pi 하드웨어에서 YOLO 객체 탐지와 GStreamer를 활용해, 실시간으로 과속 차량을 감지하는 완전한 엣지 기반 시스템입니다.
+카메라 입력부터 추론, 트래킹, 속도 측정, 과속 차량 촬영까지 모든 과정을 로컬에서 처리하므로 클라우드 연산이 전혀 필요하지 않습니다.
+
+This project is a fully edge-based system that detects speeding vehicles in real time using YOLO object detection +
+GStreamer on Qualcomm-based Rubik Pi hardware. It avoids the need for cloud computation by processing everything
+locally — from camera input to inference, tracking, speed calculation, and violation capture.
+
+# Tech Stack
+
+| Category             | Technologies                                                    |
+|----------------------|-----------------------------------------------------------------|
+| **Hardware**         | Rubik Pi 3, IMX477 image sensor, 10MP HQ Lens(16mm)             |
+| **Object Detection** | YOLOv5m                                                         |
+| **Acceleration**     | Qualcomm SNPE + TFLite delegate                                 |
+| **Pipeline**         | GStreamer                                                       |
+| **Programming**      | Python                                                          |
+| **Features**         | On-device tracking, speed measurement, snapshot, multithreading |
+
 # Table of Contents
 
 + 실행 방법 How to Run
@@ -89,7 +109,7 @@ IoU를 계산하여, 다음프레임의 객체가 같은 객체인지 판단한�
 
 Speed is calculated based on the change in the object's center coordinates across frames.
 
-### Method 2 (Selected)
+### Method 2 (✅Selected)
 
 <img src="https://github.com/user-attachments/assets/e6d91e45-a950-47ad-8ef3-96aa008875cb" width="300" height="200">
 
