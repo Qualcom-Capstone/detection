@@ -2,6 +2,8 @@
 
 실시간 과속 차량 감지 시스템 on **Rubik Pi**
 
+A real-time speeding vehicle detection system on **Rubik Pi**
+
 # Table of Contents
 
 + 실행 방법 How to Run
@@ -14,6 +16,8 @@
 
 root 디렉토리 밑에 run.sh를 실행한다.
 
+Execute the run.sh script from the root directory.
+
 ```plain
 /run.sh 소스
 
@@ -24,6 +28,10 @@ python main.py 2>/dev/null
 `./run.sh`로 실행.
 
 내부 디버깅 출력문을 전부, 생략한다(터미널 IO최소화)
+
+Run with `./run.sh.`
+
+All internal debug print statements are suppressed to minimize terminal I/O.
 
 ---
 
@@ -75,13 +83,14 @@ IoU를 계산하여, 다음프레임의 객체가 같은 객체인지 판단한�
 
 ### Method 1 (Not Used)
 
-<img src="https://github.com/user-attachments/assets/dba955f8-c974-41ce-9d1e-6f675a636b09" width="300" height="200">
+<img src="https://github.com/user-attachments/assets/9980f43f-7990-47aa-a222-8e350e34666c" width="300" height="200">
 
 프레임간 중심 좌표의 이동거리 변화로 속도를 측정
 
 Speed is calculated based on the change in the object's center coordinates across frames.
 
 ### Method 2 (Selected)
+
 <img src="https://github.com/user-attachments/assets/e6d91e45-a950-47ad-8ef3-96aa008875cb" width="300" height="200">
 
 가상의 두 선을 그어놓고, 두 선을 동과하는데 걸리는 시간을 측정한다.
