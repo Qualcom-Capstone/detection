@@ -5,16 +5,18 @@
 
 class Coordinate:
     def __init__(self, x: float, y: float, w: float, h: float):
-        self.x = x  # 왼쪽 위 x (상대 위치임)
-        self.y = y  # 왼쪽 위 y
+        self.x = x  # 중심 x (상대 위치임)
+        self.y = y  # 중심 y
         self.w = w  # 너비
         self.h = h  # 높이
 
     # 바운딩박스 중심좌표 반환
     def center(self):
-        center_x = self.x + self.w / 2
-        center_y = self.y + self.h / 2
-        return center_x, center_y
+        return self.x, self.y
+
+    # 하단 좌표 반환
+    def bottom(self):
+        return self.y + self.h / 2
 
     # 바운딩박스 면적 반환
     def area(self):

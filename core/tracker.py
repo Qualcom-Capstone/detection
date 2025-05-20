@@ -30,15 +30,18 @@ def track_object(detections):
         else:  # 못찾음 -> 새로 할당
             detected.id = object_id.assign_id()
 
-        center_y = detected.get_center()[1] * line.FRAME_HEIGHT  # 차량의 중심좌표를 관찰
+        # center_y = detected.get_center()[1] * line.FRAME_HEIGHT  # 차량의 중심좌표를 관찰
+        car_bbox_bottom = detected.coord.bottom()
         speed_val = None
 
-        if center_y >= line.LINE_Y1 and detected.id not in line.y1_pass_time:  # y1 라인을 통과할 때, 시간 기록
+        if car_bbox_bottom >= line.LINE_Y1 and detected.id not in line.y1_pass_time:  # y1 라인을 통과할 때, 시간 기록
             speed.record_y1_pass_time(detected.id)
+            print(f"차량 id={detected.id}가 y1통과")
 
-        if center_y >= line.LINE_Y2 and detected.id not in line.y2_pass_time:  # y2 라인을 통과할 때, 시간 기록
+        if car_bbox_bottom >= line.LINE_Y2 and detected.id not in line.y2_pass_time:  # y2 라인을 통과할 때, 시간 기록
             speed.record_y2_pass_time(detected.id)
             speed_val = speed.compute_speed(detected.id)  # 구간에서의 속도를 측정
+            print(f"차량 id={detected.id}가 y2통과")
 
         if speed_val is not None and speed_val > SPEED_LIMIT:  # 속도가 초과 했을 때
             print(f"[🚨 과속] 차량 id={detected.id}, Speed={speed_val:.2f} km/h (제한속도: {SPEED_LIMIT} km/h)")
