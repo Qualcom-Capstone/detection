@@ -8,6 +8,8 @@ from shared import speed_limit, violation_filter
 from s3_uploader import s3_upload
 from manager import camera_manager
 from shared import shared_queue
+from shared import line
+from shared.speed_limit import SPEED_LIMIT
 
 tracked_objects = []
 IOU_THRESHOLD = 0.5  # 필요시 조정
@@ -28,9 +30,18 @@ def track_object(detections):
         else:  # 못찾음 -> 새로 할당
             detected.id = object_id.assign_id()
 
-        speed_val = speed.compute_and_store_speed(detected.id, detected.coord, detected.timestamp)  # 속도 계산 및 저장
+        center_y = detected.get_center()[1] * line.FRAME_HEIGHT  # 차량의 중심좌표를 관찰
+        speed_val = None
 
-        if speed_val is not None and speed_val > 1.0:  # 과속 했다면
+        if center_y >= line.LINE_Y1 and detected.id not in line.y1_pass_time:  # y1 라인을 통과할 때, 시간 기록
+            speed.record_y1_pass_time(detected.id)
+
+        if center_y >= line.LINE_Y2 and detected.id not in line.y2_pass_time:  # y2 라인을 통과할 때, 시간 기록
+            speed.record_y2_pass_time(detected.id)
+            speed_val = speed.compute_speed(detected.id)  # 구간에서의 속도를 측정
+
+        if speed_val is not None and speed_val > SPEED_LIMIT:  # 속도가 초과 했을 때
+            print(f"[🚨 과속] 차량 id={detected.id}, Speed={speed_val:.2f} km/h (제한속도: {SPEED_LIMIT} km/h)")
             is_ok = violation_filter.should_send_violation(detected.id)  # 보내도 되는지 확인 (이전에 이미 단속된 차량인지)
             if is_ok:
                 violation_info = {
@@ -41,14 +52,9 @@ def track_object(detections):
                 }
                 shared_queue.imageQueue.put("TAKE_SHOT")  # 과속한 순간의 프레임, 큐에 넣음
                 shared_queue.metaQueue.put(violation_info)  # 과속한 순간의 메타데이터, 큐에 넣음
+        elif speed_val is not None and speed_val <= SPEED_LIMIT:
+            print(f"[✅ 정상] 차량 id={detected.id}, Speed={speed_val:.2f} km/h (제한속도: {SPEED_LIMIT} km/h)")
 
         current_frame_objects.append(detected)  # 현재 프레임에, 생성했던 객체 넣음
-
-        print(
-            f"id={detected.id}, "
-            f"speed={'{:.3f}'.format(speed_val) if speed_val is not None else 'None'}, "
-            f"x={detected.coord.x:.3f}, y={detected.coord.y:.3f}, "
-            f"w={detected.coord.w:.3f}, h={detected.coord.h:.3f}"
-        )
 
     tracked_objects = current_frame_objects  # 다음 프레임 비교를 위해 현재 프레임 객체들을 트래킹 리스트로 갱신
