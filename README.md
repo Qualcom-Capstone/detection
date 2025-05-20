@@ -103,8 +103,6 @@ and the time taken for the object to pass between these lines is measured.
 
 However, to calculate the speed accurately, the real-world distance between the two lines must be known.
 
----
-
 ## Multi Threading
 
 병목 현상을 최소화 하기 위해서 멀티 스레딩을 사용했다.
