@@ -20,7 +20,7 @@ def postprocess_thread():
 
 
 def run_thread():
-    time.sleep(1)
+    time.sleep(2)
     global _thread_started
     if _thread_started:  # 스레드 실행했다면
         return

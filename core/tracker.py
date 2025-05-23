@@ -30,10 +30,8 @@ def track_object(detections):
         else:  # 못찾음 -> 새로 할당
             detected.id = object_id.assign_id()
 
-        # center_y = detected.get_center()[1] * line.FRAME_HEIGHT  # 차량의 중심좌표를 관찰
-        car_bbox_bottom = detected.coord.bottom()
+        car_bbox_bottom = detected.coord.bottom() * line.FRAME_HEIGHT  # 차량의 바운딩박스 하단 좌표를 관찰
         speed_val = None
-
         if car_bbox_bottom >= line.LINE_Y1 and detected.id not in line.y1_pass_time:  # y1 라인을 통과할 때, 시간 기록
             speed.record_y1_pass_time(detected.id)
             print(f"차량 id={detected.id}가 y1통과")

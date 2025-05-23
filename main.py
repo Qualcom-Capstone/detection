@@ -5,6 +5,7 @@ GStreamer관련 출력들 차단함
 """
 import sys, os, gi, re
 import threading
+import time
 
 from gi.repository import Gst, GLib
 from pipeline_config import pipeline_config
@@ -39,6 +40,7 @@ frame_sink = pipeline.get_by_name('frame_sink')
 loop = GLib.MainLoop()
 
 run_thread()  # 트래킹 스레드
+time.sleep(2)  # 안정화 위해서 2초 쉬고 프레임관련 스레드 실행
 threading.Thread(target=save_and_send, args=(frame_sink,), daemon=True).start()  # 사진 촬영 및 전송 스레드
 
 try:

@@ -18,7 +18,7 @@ def save_and_send(frame_sink):
                 continue
 
             GLib.idle_add(camera_manager.take_screenshot, frame_sink, meta_item['id'])
-            time.sleep(1)
+            time.sleep(2)
 
             img_path = f"/home/root/detection/images/screenshot_{meta_item['id']}.jpg"
             s3_upload.upload_image_to_cars_folder(img_path)  # 찍은 이미지 s3서버로 전송
