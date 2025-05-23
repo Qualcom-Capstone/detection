@@ -31,6 +31,7 @@ def save_and_send(frame_sink):
             h = meta_item['coord'].h * FRAME_HEIGHT
 
             data = {
+                "image_url": f"https://your-bucket.s3.ap-northeast-2.amazonaws.com/images/car_{meta_item['id']}.jpg",
                 "s3_key": f"images/car_{meta_item['id']}",
                 "car_speed": meta_item['over_speed'],
                 "car_id": meta_item['id'],
