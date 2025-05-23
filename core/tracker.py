@@ -46,7 +46,6 @@ def track_object(detections):
             is_ok = violation_filter.should_send_violation(detected.id)  # 보내도 되는지 확인 (이전에 이미 단속된 차량인지)
             if is_ok:
                 violation_info = {
-                    'time': detected.timestamp,
                     'over_speed': speed_val,
                     'id': detected.id,
                     'coord': detected.coord

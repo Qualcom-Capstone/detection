@@ -21,9 +21,17 @@ headers = {
     # "Authorization": "Bearer your_access_token"  # 필요 시 주석 해제
 }
 
+
 # 4. POST 요청
-response = requests.post(url, json=data, headers=headers)
+# response = requests.post(url, json=data, headers=headers)
 
 # 5. 응답 확인
-print(f"Status Code: {response.status_code}")
-print("Response Body:", response.json())
+# print(f"Status Code: {response.status_code}")
+# print("Response Body:", response.json())
+
+
+# 서버로 전송하는 함수
+def send_to_server(data):
+    response = requests.post(url, json=data, headers=headers)
+    print(f"Status Code: {response.status_code}")
+    print("Response Body:", response.json())
