@@ -23,7 +23,7 @@ def save_and_send(frame_sink):
             time.sleep(2)
 
             img_path = f"/home/root/detection/images/car_{meta_item['id']}.jpg"
-            s3_upload.upload_image_to_cars_folder(img_path)  # 찍은 이미지 s3서버로 전송
+            s3_meta = s3_upload.upload_image_to_cars_folder(img_path)  # 찍은 이미지 s3서버로 전송
 
             x = meta_item['coord'].x * FRAME_WIDTH  # 바운딩박스의 중앙좌표 x (픽셀단위)
             y = meta_item['coord'].y * FRAME_HEIGHT  # 바운딩박스의 중앙좌표 y
@@ -31,8 +31,8 @@ def save_and_send(frame_sink):
             h = meta_item['coord'].h * FRAME_HEIGHT
 
             data = {
-                "image_url": f"https://your-bucket.s3.ap-northeast-2.amazonaws.com/images/car_{meta_item['id']}.jpg",
-                "s3_key": f"images/car_{meta_item['id']}",
+                "image_url": s3_meta['s3_url'],
+                "s3_key": s3_meta['s3_key'],
                 "car_speed": meta_item['over_speed'],
                 "car_id": meta_item['id'],
                 "x": x,
