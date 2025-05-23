@@ -20,12 +20,12 @@ def save_and_send(frame_sink):
             GLib.idle_add(camera_manager.take_screenshot, frame_sink, meta_item['id'])
             time.sleep(2)
 
-            img_path = f"/home/root/detection/images/screenshot_{meta_item['id']}.jpg"
+            img_path = f"/home/root/detection/images/car_{meta_item['id']}.jpg"
             s3_upload.upload_image_to_cars_folder(img_path)  # 찍은 이미지 s3서버로 전송
             # send_to_server(meta_item) # 메타정보 서버로 보냄
             print("--------------------------------------------")
             print(f"ID: {meta_item['id']} 차량 속도 위반")
-            print(f"screenshot_{meta_item['id']} 서버 전송 완료.")
+            print(f"car_{meta_item['id']} 서버 전송 완료.")
             print("메타 정보 서버 전송 완료.")
             print("--------------------------------------------")
 
