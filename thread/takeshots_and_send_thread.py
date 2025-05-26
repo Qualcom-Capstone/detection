@@ -24,10 +24,10 @@ def save_and_send(frame_sink):
             img_path = f"/home/root/detection/images/car_{meta_item['id']}.jpg"
             s3_meta = s3_upload.upload_image_to_cars_folder(img_path)  # 찍은 이미지 s3서버로 전송
 
-            x = meta_item['coord'].x * FRAME_WIDTH  # 바운딩박스의 중앙좌표 x (픽셀단위)
-            y = meta_item['coord'].y * FRAME_HEIGHT  # 바운딩박스의 중앙좌표 y
-            w = meta_item['coord'].w * FRAME_WIDTH
-            h = meta_item['coord'].h * FRAME_HEIGHT
+            x = meta_item['coord'].x  # 바운딩박스의 상단 x좌표 : 상대 좌표로 보냄
+            y = meta_item['coord'].y  # 바운딩박스의 상단 y좌표
+            w = meta_item['coord'].w
+            h = meta_item['coord'].h
 
             data = {
                 "image_url": s3_meta['s3_url'],
@@ -44,8 +44,8 @@ def save_and_send(frame_sink):
 
             print("--------------------------------------------")
             print(f"ID: {meta_item['id']} 차량 속도 위반")
-            print(f"car_{meta_item['id']} 서버 전송 완료.")
-            print("메타 정보 서버 전송 완료.")
+            print(f"car_{meta_item['id']}.jpg 서버 전송 완료.")
+            print(f"x: {data['x']}, y: {data['y']}, w: {data['w']}, h: {data['h']} 속도: {data['car_speed']} 메타 서버 전송 완료.")
             print("--------------------------------------------")
 
         except Exception as e:
