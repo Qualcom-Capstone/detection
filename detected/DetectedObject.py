@@ -18,6 +18,7 @@ class DetectedObject:
         self.coord = coord
         self.timestamp = timestamp
         self.id = None  # 객체 생성시, 특정 ID를 할당
+        self.prev_y = coord.y # 이전 y좌표
 
     # 바운딩박스 중심좌표 반환
     def get_center(self):
