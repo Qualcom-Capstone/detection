@@ -30,18 +30,27 @@ def track_object(detections):
         else:  # 못찾음 -> 새로 할당
             detected.id = object_id.assign_id()
 
+        direction = None
+        for prev in tracked_objects:
+            if prev.id == detected.id:
+                if detected.coord.y > prev.coord.y:
+                    direction = 1  # DOWN
+                else:
+                    direction = 0  # UP
+                break
+
         car_bbox_bottom = detected.coord.bottom() * line.FRAME_HEIGHT  # 차량의 바운딩박스 하단 좌표를 관찰
         speed_val = None
-        if car_bbox_bottom >= line.LINE_Y1 and detected.id not in line.y1_pass_time:  # y1 라인을 통과할 때, 시간 기록
+        if car_bbox_bottom >= line.LINE_Y1 and detected.id not in line.y1_pass_time and direction == 1:  # y1 라인을 통과할 때, 시간 기록
             speed.record_y1_pass_time(detected.id)
             print(f"차량 id={detected.id}가 y1통과")
 
-        if car_bbox_bottom >= line.LINE_Y2 and detected.id not in line.y2_pass_time:  # y2 라인을 통과할 때, 시간 기록
+        if car_bbox_bottom >= line.LINE_Y2 and detected.id not in line.y2_pass_time and direction == 1:  # y2 라인을 통과할 때, 시간 기록
             speed.record_y2_pass_time(detected.id)
             speed_val = speed.compute_speed(detected.id)  # 구간에서의 속도를 측정
             print(f"차량 id={detected.id}가 y2통과")
 
-        if speed_val is not None and speed_val > SPEED_LIMIT:  # 속도가 초과 했을 때
+        if speed_val is not None and speed_val > SPEED_LIMIT and direction == 1:  # 속도가 초과 했을 때
             print(f"[🚨 과속] 차량 id={detected.id}, Speed={speed_val:.2f} km/h (제한속도: {SPEED_LIMIT} km/h)")
             is_ok = violation_filter.should_send_violation(detected.id)  # 보내도 되는지 확인 (이전에 이미 단속된 차량인지)
             if is_ok:
