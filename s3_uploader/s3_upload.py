@@ -33,7 +33,7 @@ def upload_image_to_cars_folder(image_path):
     s3_key = f"cars/{original_filename}"
 
     try:
-        s3.upload_file(image_path, BUCKET_NAME, s3_key)
+        s3.upload_file(image_path, BUCKET_NAME, s3_key, ExtraArgs={"ACL": "public-read"})
 
         s3_url = f"https://{BUCKET_NAME}.s3.{REGION}.amazonaws.com/{quote_plus(s3_key)}"
 
