@@ -19,7 +19,7 @@ def postprocess_thread():
             print(f"PostProcessThread Error!! : {e}")
 
 
-def run_thread():
+def tracking_thread():
     time.sleep(2)
     global _thread_started
     if _thread_started:  # 스레드 실행했다면

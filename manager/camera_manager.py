@@ -22,7 +22,7 @@ def take_screenshot(frame_sink, car_id):
         frame_bytes = bytes(map_info.data)
         caps_str = sample.get_caps().to_string()
         print("[DEBUG] sample caps:", caps_str)
-        filename = f"/home/root/detection/images/screenshot_{car_id}.jpg"
+        filename = f"/home/root/detection/images/car_{car_id}.jpg"
         save_raw_frame_as_jpeg(frame_bytes, filename)
     finally:
         buffer.unmap(map_info)
