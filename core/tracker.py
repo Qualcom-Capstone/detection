@@ -12,7 +12,7 @@ from shared import line
 from shared.speed_limit import SPEED_LIMIT
 
 tracked_objects = []
-IOU_THRESHOLD = 0.5  # 필요시 조정
+IOU_THRESHOLD = 0.4  # 필요시 조정
 
 
 def track_object(detections):
