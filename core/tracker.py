@@ -12,7 +12,7 @@ from shared import line
 from shared.speed_limit import SPEED_LIMIT
 
 tracked_objects = []
-IOU_THRESHOLD = 0.5  # 필요시 조정
+IOU_THRESHOLD = 0.4  # 필요시 조정
 
 
 def track_object(detections):
@@ -50,7 +50,7 @@ def track_object(detections):
                     'id': detected.id,
                     'coord': detected.coord
                 }
-                shared_queue.imageQueue.put("TAKE_SHOT")  # 과속한 순간의 프레임, 큐에 넣음
+                shared_queue.shotFlagQueue.put("TAKE_SHOT")  # 과속한 순간 신호 전달
                 shared_queue.metaQueue.put(violation_info)  # 과속한 순간의 메타데이터, 큐에 넣음
         elif speed_val is not None and speed_val <= SPEED_LIMIT:
             print(f"[✅ 정상] 차량 id={detected.id}, Speed={speed_val:.2f} km/h (제한속도: {SPEED_LIMIT} km/h)")

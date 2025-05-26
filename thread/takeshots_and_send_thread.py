@@ -13,14 +13,13 @@ _thread_started = False
 def save_and_send(frame_sink):
     while True:
         try:
-            flag = shared_queue.imageQueue.get()  # 큐에서 프레임 꺼냄
+            flag = shared_queue.shotFlagQueue.get()  # 큐에서 프레임 꺼냄
             meta_item = shared_queue.metaQueue.get()  # 큐에서 메타데이터 꺼냄
 
             if flag != "TAKE_SHOT" or not meta_item:
                 continue
 
-            GLib.idle_add(camera_manager.take_screenshot, frame_sink, meta_item['id'])
-            time.sleep(2)
+            take_snapshot(frame_sink, meta_item)
 
             img_path = f"/home/root/detection/images/car_{meta_item['id']}.jpg"
             s3_meta = s3_upload.upload_image_to_cars_folder(img_path)  # 찍은 이미지 s3서버로 전송
@@ -51,6 +50,17 @@ def save_and_send(frame_sink):
 
         except Exception as e:
             print(f"Save and Send Thread Error! : {e}")
+
+
+def take_snapshot(frame_sink, meta_item):
+    done_event = threading.Event()
+
+    def wrapped():
+        camera_manager.take_screenshot(frame_sink, meta_item['id'])
+        done_event.set()
+        return False
+
+    GLib.idle_add(wrapped)
 
 
 def run_save_and_send_thread():
