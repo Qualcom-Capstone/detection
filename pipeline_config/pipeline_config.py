@@ -5,7 +5,7 @@
 pipeline_str = (
     'qtiqmmfsrc name=camsrc camera=0 ! '
     'qtivtransform flip-vertical=true ! '
-    'video/x-raw(memory:GBM),format=NV12,width=1920,height=1080,framerate=15/1 ! '
+    'video/x-raw(memory:GBM),format=NV12,width=1920,height=1080,framerate=20/1 ! '
     'queue ! tee name=split '
     'split. ! queue ! '
     'qtimetamux name=metamux ! queue ! '

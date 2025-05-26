@@ -5,7 +5,7 @@ import time
 
 
 def take_screenshot(frame_sink, car_id):
-    print("[INFO] Taking screenshot...")
+    print("[INFO] 사진 촬영중...")
 
     try:
         sample = frame_sink.emit("pull-sample")
@@ -29,6 +29,7 @@ def take_screenshot(frame_sink, car_id):
             print("[DEBUG] sample caps:", caps_str)
             filename = f"/home/root/detection/images/car_{car_id}.jpg"
             save_raw_frame_as_jpeg(frame_bytes, filename)
+            print("[INFO] 촬영 완료!")
         finally:
             buffer.unmap(map_info)
     except Exception as e:
