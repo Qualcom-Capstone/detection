@@ -39,7 +39,7 @@ frame_sink = pipeline.get_by_name('frame_sink')
 # 메인 루프 실행
 loop = GLib.MainLoop()
 
-GLib.idle_add(start_threads)
+GLib.idle_add(start_threads, frame_sink)
 
 try:
     print("[INFO] main loop시작")

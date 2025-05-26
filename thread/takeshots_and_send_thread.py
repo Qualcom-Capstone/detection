@@ -54,7 +54,7 @@ def save_and_send(frame_sink):
 
 def take_snapshot(frame_sink, meta_item):
     GLib.idle_add(camera_manager.take_screenshot, frame_sink, meta_item['id'])
-    time.sleep(2)
+    time.sleep(1)
 
 
 def run_save_and_send_thread():
