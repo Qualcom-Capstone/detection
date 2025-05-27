@@ -33,7 +33,6 @@ def save_and_send(frame_sink):
                 "image_url": s3_meta['s3_url'],
                 "s3_key": s3_meta['s3_key'],
                 "car_speed": meta_item['over_speed'],
-                "car_id": meta_item['id'],
                 "x": x,
                 "y": y,
                 "w": w,

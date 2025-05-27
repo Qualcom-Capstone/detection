@@ -7,7 +7,6 @@ url = "https://domain.com/api/v1/crud/cars"  # 실제 API 주소로 변경
 data = {
     "image_url": "https://your-bucket.s3.ap-northeast-2.amazonaws.com/images/car_123.jpg",
     "s3_key": "images/car_123.jpg",
-    "car_number": "12가3456",
     "car_speed": 92,
     "x": 120,
     "y": 230,
