@@ -48,6 +48,10 @@ def track_object(detections):
         if car_bbox_bottom >= line.LINE_Y2 and detected.id not in line.y2_pass_time and direction == 1:  # y2 라인을 통과할 때, 시간 기록
             speed.record_y2_pass_time(detected.id)
             speed_val = speed.compute_speed(detected.id)  # 구간에서의 속도를 측정
+
+            if speed_val >= 400:
+                continue
+
             print(f"차량 id={detected.id}가 y2통과")
 
         if speed_val is not None and speed_val > SPEED_LIMIT and direction == 1:  # 속도가 초과 했을 때
