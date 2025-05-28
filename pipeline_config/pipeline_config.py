@@ -5,7 +5,7 @@
 pipeline_str = (
     'qtiqmmfsrc name=camsrc camera=0 ! '
     'qtivtransform flip-vertical=true ! '
-    'video/x-raw(memory:GBM),format=NV12,width=1920,height=1080,framerate=20/1 ! '
+    'video/x-raw(memory:GBM),format=NV12,width=1920,height=1080,framerate=15/1 ! '
     'queue ! tee name=split '
     'split. ! queue ! '
     'qtimetamux name=metamux ! queue ! '
@@ -15,7 +15,7 @@ pipeline_str = (
     'qtimltflite delegate=external external-delegate-path=libQnnTFLiteDelegate.so '
     'external-delegate-options="QNNExternalDelegate,backend_type=htp;" '
     'model=/opt/yolov5m-320x320-int8.tflite ! queue ! '
-    'qtimlvdetection threshold=51.0 results=10 module=yolov5 '
+    'qtimlvdetection threshold=61.0 results=10 module=yolov5 '
     'labels=/opt/yolov5m.labels '
     'constants="YoloV5,q-offsets=<3.0>,q-scales=<0.005047998391091824>;" ! '
     'text/x-raw ! tee name=mt '
