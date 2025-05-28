@@ -20,31 +20,43 @@ def save_and_send(frame_sink):
                 continue
 
             take_snapshot(frame_sink, meta_item)
+            time.sleep(1)
 
             img_path = f"/home/root/detection/images/car_{meta_item['id']}.jpg"
             s3_meta = s3_upload.upload_image_to_cars_folder(img_path)  # 찍은 이미지 s3서버로 전송
 
-            x = meta_item['coord'].x  # 바운딩박스의 상단 x좌표 : 상대 좌표로 보냄
-            y = meta_item['coord'].y  # 바운딩박스의 상단 y좌표
-            w = meta_item['coord'].w
-            h = meta_item['coord'].h
+
+            x = round(meta_item['coord'].x, 3)
+            y = round(meta_item['coord'].y, 3)
+            w = round(meta_item['coord'].w, 3)
+            h = round(meta_item['coord'].h, 3)
+
+            print(f"url : {s3_meta['s3_url']}")
+            print(f"key : {s3_meta['s3_key']}")
+            print(x)
+            print(y)
+            print(w)
+            print(h)
+
 
             data = {
                 "image_url": s3_meta['s3_url'],
                 "s3_key": s3_meta['s3_key'],
-                "car_speed": meta_item['over_speed'],
+                "car_speed": int(meta_item['over_speed']),
                 "x": x,
                 "y": y,
                 "w": w,
                 "h": h
             }
-
+            print("이제 보냄")
             request2server.send_to_server(data)  # 메타 정보 서버로 보냄
+            # print(data)
 
             print("--------------------------------------------")
             print(f"ID: {meta_item['id']} 차량 속도 위반")
             print(f"car_{meta_item['id']}.jpg 서버 전송 완료.")
-            print(f"x: {data['x']}, y: {data['y']}, w: {data['w']}, h: {data['h']} 속도: {data['car_speed']} 메타 서버 전송 완료.")
+            print(
+                f"x: {data['x']}, y: {data['y']}, w: {data['w']}, h: {data['h']} 속도: {data['car_speed']} 메타 서버 전송 완료.")
             print("--------------------------------------------")
 
         except Exception as e:

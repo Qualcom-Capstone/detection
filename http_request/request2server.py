@@ -1,7 +1,7 @@
 import requests
 
 # 1. API URL
-url = "https://domain.com/api/v1/crud/cars"  # 실제 API 주소로 변경
+url = "https://api.autonotify.store/api/v1/crud/cars"  # 실제 API 주소로 변경
 
 # 2. 요청 데이터
 data = {
@@ -26,6 +26,9 @@ def send_to_server(data):
     global url
     global headers
 
+    #print(url)
+    #print(headers)
+
     response = requests.post(url, json=data, headers=headers)
     print(f"Status Code: {response.status_code}")
-    print("Response Body:", response.json())
+    # print("Response Body:", response.json())
