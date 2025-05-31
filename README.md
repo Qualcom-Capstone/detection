@@ -129,6 +129,8 @@ However, to calculate the speed accurately, the real-world distance between the 
 
 Multithreading is used to minimize bottlenecks and enhance performance.
 
+<img src="https://github.com/user-attachments/assets/c24c68ef-23f3-4e48-8641-be3eba475cd7" width="900" height="200">
+
 + 메인 스레드 Main Thread
 + 트래킹, 속도 측정 스레드 Tracking & Speed Measurement Thread
 + 사진촬영 및 전송 스레드 Screenshot & Upload Thread
